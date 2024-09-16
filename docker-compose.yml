@@ -1,0 +1,59 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    environment:
+      - DJANGO_SETTINGS_MODULE=core.settings
+    networks:
+      - backend-network
+    depends_on:
+      - postgresdb
+
+  # frontend:
+  #   container_name: frontend
+  #   build:
+  #     context: ../Bnex-frontend
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ../Bnex-frontend:/app
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     - DJANGO_SETTINGS_MODULE=core.settings
+  #   networks:
+  #     - bnex-backend-network
+  #   depends_on:
+  #     - postgres-database
+
+  postgresdb:
+    container_name: postgresdb
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: Recipes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - backend-network
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
+
+
+volumes:
+  postgres_data:
+
+networks:
+    backend-network:
+        driver: bridge
+        name: network
+
+# problema com a resolução de nome:
+#  docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nome_do_container
